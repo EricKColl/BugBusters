@@ -124,7 +124,9 @@ public class Vista {
         String descripcion = leerTexto("Descripción: ");
         double precioVenta = leerDoubleSeguro("Precio de venta: ");
         double gastosEnvio = leerDoubleSeguro("Gastos de envío: ");
-        int tiempoPreparacion = leerEnteroSeguro("Tiempo de preparación: ");
+
+        // Aquí dejamos claro al usuario que la unidad es minutos
+        int tiempoPreparacion = leerEnteroSeguro("Tiempo de preparación (minutos): ");
 
         try {
             controlador.anadirArticulo(codigo, descripcion, precioVenta, gastosEnvio, tiempoPreparacion);
@@ -325,7 +327,6 @@ public class Vista {
                     return;
                 }
             } catch (ClienteYaExisteException e) {
-                // Esto en teoría no debería pasar porque hemos comprobado antes, pero lo controlamos igualmente
                 System.out.println("ERROR: " + e.getMessage());
                 return;
             }

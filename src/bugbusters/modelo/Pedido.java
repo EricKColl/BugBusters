@@ -101,6 +101,8 @@ public class Pedido {
      *
      * Un pedido se puede cancelar solo si todavía no ha pasado
      * el tiempo de preparación del artículo.
+     *
+     * El tiempo de preparación se interpreta en MINUTOS.
      */
     public boolean puedeCancelar() {
         long minutosTranscurridos = Duration.between(fechaHora, LocalDateTime.now()).toMinutes();
@@ -110,7 +112,8 @@ public class Pedido {
     /*
      * estaEnviado()
      *
-     * Si ya NO se puede cancelar, lo consideramos enviado.
+     * Si ya no se puede cancelar, consideramos que el pedido
+     * ya ha sido enviado.
      */
     public boolean estaEnviado() {
         return !puedeCancelar();
@@ -118,7 +121,9 @@ public class Pedido {
 
     /*
      * toString()
+     *
      * Muestra la información principal del pedido.
+     * También deja visible el tiempo de preparación del artículo en minutos.
      */
     @Override
     public String toString() {
@@ -128,6 +133,7 @@ public class Pedido {
                 ", articulo=" + articulo.getCodigo() +
                 ", cantidad=" + cantidad +
                 ", fechaHora=" + fechaHora +
+                ", tiempoPreparacionArticulo=" + articulo.getTiempoPreparacion() + " minutos" +
                 ", total=" + calcularTotal() +
                 ", enviado=" + estaEnviado() +
                 '}';

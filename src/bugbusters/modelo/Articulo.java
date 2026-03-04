@@ -12,6 +12,8 @@ public class Articulo {
     private String descripcion;
     private double precioVenta;
     private double gastosEnvio;
+
+    // Tiempo de preparación expresado en minutos
     private int tiempoPreparacion;
 
     /*
@@ -74,6 +76,7 @@ public class Articulo {
     /*
      * toString()
      * Muestra el artículo como texto.
+     * Aquí dejamos claro que el tiempo de preparación está en minutos.
      */
     @Override
     public String toString() {
@@ -82,7 +85,7 @@ public class Articulo {
                 ", descripcion='" + descripcion + '\'' +
                 ", precioVenta=" + precioVenta +
                 ", gastosEnvio=" + gastosEnvio +
-                ", tiempoPreparacion=" + tiempoPreparacion +
+                ", tiempoPreparacion=" + tiempoPreparacion + " minutos" +
                 '}';
     }
 }
