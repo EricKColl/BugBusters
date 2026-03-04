@@ -9,38 +9,38 @@ import java.util.Map;
 /*
  * Clase Datos
  *
- * Esta es la clase más importante del modelo en este producto.
- * Su función es guardar y gestionar todos los datos de la aplicación:
+ * Esta clase guarda y gestiona toda la información de la aplicación.
+ * Aquí almacenamos:
  * - clientes
  * - artículos
  * - pedidos
  *
- * En vez de usar listas para todo, aquí usamos Map porque:
- * - permite buscar más rápido por clave
- * - cliente -> por email
- * - artículo -> por código
- * - pedido -> por número de pedido
+ * Usamos colecciones genéricas:
+ * - Map para buscar rápido por clave
+ * - List para devolver listados al exterior
  *
- * LinkedHashMap mantiene el orden de inserción,
- * lo cual viene bien para mostrar datos en consola de forma ordenada.
+ * Claves usadas:
+ * - cliente -> email
+ * - artículo -> código
+ * - pedido -> número de pedido
  */
 public class Datos {
 
-    // Colección de clientes: clave = email
+    // Mapa de clientes: clave = email
     private Map<String, Cliente> clientes;
 
-    // Colección de artículos: clave = código
+    // Mapa de artículos: clave = código
     private Map<String, Articulo> articulos;
 
-    // Colección de pedidos: clave = número de pedido
+    // Mapa de pedidos: clave = número de pedido
     private Map<Integer, Pedido> pedidos;
 
-    // Contador para generar automáticamente el número del siguiente pedido
+    // Contador para asignar el siguiente número de pedido automáticamente
     private int siguienteNumeroPedido;
 
     /*
      * Constructor
-     * Inicializa todas las colecciones vacías.
+     * Inicializa las colecciones vacías.
      */
     public Datos() {
         clientes = new LinkedHashMap<>();
@@ -55,23 +55,49 @@ public class Datos {
 
     /*
      * anadirCliente()
-     * Añade un cliente al mapa usando su email como clave.
+     *
+     * Añade un cliente nuevo.
+     * Si ya existe otro cliente con el mismo email, lanza excepción.
      */
-    public void anadirCliente(Cliente cliente) {
-        clientes.put(cliente.getEmail().toLowerCase(), cliente);
+    public void anadirCliente(Cliente cliente) throws ClienteYaExisteException {
+        String emailClave = cliente.getEmail().toLowerCase();
+
+        if (clientes.containsKey(emailClave)) {
+            throw new ClienteYaExisteException("Ya existe un cliente con ese email.");
+        }
+
+        clientes.put(emailClave, cliente);
     }
 
     /*
      * buscarCliente()
+     *
      * Busca un cliente por email.
-     * Si no existe, devuelve null.
+     * Si no existe, lanza excepción.
      */
-    public Cliente buscarCliente(String email) {
-        return clientes.get(email.toLowerCase());
+    public Cliente buscarCliente(String email) throws ClienteNoEncontradoException {
+        String emailClave = email.toLowerCase();
+
+        if (!clientes.containsKey(emailClave)) {
+            throw new ClienteNoEncontradoException("No existe ningún cliente con ese email.");
+        }
+
+        return clientes.get(emailClave);
+    }
+
+    /*
+     * existeCliente()
+     *
+     * Devuelve true si el cliente existe y false si no existe.
+     * Este método es útil para algunas comprobaciones desde la vista/controlador.
+     */
+    public boolean existeCliente(String email) {
+        return clientes.containsKey(email.toLowerCase());
     }
 
     /*
      * obtenerTodosClientes()
+     *
      * Devuelve una lista con todos los clientes.
      */
     public List<Cliente> obtenerTodosClientes() {
@@ -80,6 +106,7 @@ public class Datos {
 
     /*
      * obtenerClientesEstandar()
+     *
      * Devuelve solo los clientes estándar.
      */
     public List<Cliente> obtenerClientesEstandar() {
@@ -96,6 +123,7 @@ public class Datos {
 
     /*
      * obtenerClientesPremium()
+     *
      * Devuelve solo los clientes premium.
      */
     public List<Cliente> obtenerClientesPremium() {
@@ -116,24 +144,49 @@ public class Datos {
 
     /*
      * anadirArticulo()
-     * Añade un artículo al mapa usando su código como clave.
+     *
+     * Añade un artículo nuevo.
+     * Si ya existe otro artículo con el mismo código, lanza excepción.
      */
-    public void anadirArticulo(Articulo articulo) {
-        articulos.put(articulo.getCodigo().toLowerCase(), articulo);
+    public void anadirArticulo(Articulo articulo) throws ArticuloYaExisteException {
+        String codigoClave = articulo.getCodigo().toLowerCase();
+
+        if (articulos.containsKey(codigoClave)) {
+            throw new ArticuloYaExisteException("Ya existe un artículo con ese código.");
+        }
+
+        articulos.put(codigoClave, articulo);
     }
 
     /*
      * buscarArticulo()
+     *
      * Busca un artículo por código.
-     * Si no existe, devuelve null.
+     * Si no existe, lanza excepción.
      */
-    public Articulo buscarArticulo(String codigo) {
-        return articulos.get(codigo.toLowerCase());
+    public Articulo buscarArticulo(String codigo) throws ArticuloNoEncontradoException {
+        String codigoClave = codigo.toLowerCase();
+
+        if (!articulos.containsKey(codigoClave)) {
+            throw new ArticuloNoEncontradoException("No existe ningún artículo con ese código.");
+        }
+
+        return articulos.get(codigoClave);
+    }
+
+    /*
+     * existeArticulo()
+     *
+     * Devuelve true si el artículo existe y false si no existe.
+     */
+    public boolean existeArticulo(String codigo) {
+        return articulos.containsKey(codigo.toLowerCase());
     }
 
     /*
      * obtenerTodosArticulos()
-     * Devuelve todos los artículos en forma de lista.
+     *
+     * Devuelve una lista con todos los artículos.
      */
     public List<Articulo> obtenerTodosArticulos() {
         return new ArrayList<>(articulos.values());
@@ -146,27 +199,19 @@ public class Datos {
     /*
      * crearPedido()
      *
-     * Crea un pedido nuevo a partir de:
-     * - email del cliente
-     * - código del artículo
-     * - cantidad
+     * Crea un pedido nuevo.
+     * Para ello:
+     * - el cliente debe existir
+     * - el artículo debe existir
      *
-     * Si el cliente o el artículo no existen, devuelve null.
-     *
-     * IMPORTANTE:
-     * Más adelante esto lo mejoraremos con excepciones personalizadas,
-     * porque el producto lo pide.
+     * Si alguno no existe, se lanzará la excepción correspondiente.
      */
-    public Pedido crearPedido(String email, String codigoArticulo, int cantidad) {
+    public Pedido crearPedido(String email, String codigoArticulo, int cantidad)
+            throws ClienteNoEncontradoException, ArticuloNoEncontradoException {
+
         Cliente cliente = buscarCliente(email);
         Articulo articulo = buscarArticulo(codigoArticulo);
 
-        // Si falta alguno de los dos datos, no se puede crear el pedido
-        if (cliente == null || articulo == null) {
-            return null;
-        }
-
-        // Se crea el pedido con número automático y fecha/hora actual
         Pedido pedido = new Pedido(
                 siguienteNumeroPedido,
                 cliente,
@@ -175,10 +220,7 @@ public class Datos {
                 LocalDateTime.now()
         );
 
-        // Se guarda en el mapa
         pedidos.put(siguienteNumeroPedido, pedido);
-
-        // Se incrementa el contador para el siguiente pedido
         siguienteNumeroPedido++;
 
         return pedido;
@@ -186,38 +228,43 @@ public class Datos {
 
     /*
      * buscarPedido()
+     *
      * Busca un pedido por su número.
+     * Si no existe, lanza excepción.
      */
-    public Pedido buscarPedido(int numeroPedido) {
+    public Pedido buscarPedido(int numeroPedido) throws PedidoNoEncontradoException {
+        if (!pedidos.containsKey(numeroPedido)) {
+            throw new PedidoNoEncontradoException("No existe ningún pedido con ese número.");
+        }
+
         return pedidos.get(numeroPedido);
     }
 
     /*
      * borrarPedido()
      *
-     * Elimina un pedido solo si existe y se puede cancelar.
-     * Devuelve:
-     * - true si se ha borrado
-     * - false si no se ha podido borrar
+     * Elimina un pedido solo si:
+     * - existe
+     * - todavía se puede cancelar
+     *
+     * Si no existe o no se puede cancelar, lanza excepción.
      */
-    public boolean borrarPedido(int numeroPedido) {
+    public void borrarPedido(int numeroPedido)
+            throws PedidoNoEncontradoException, PedidoNoCancelableException {
+
         Pedido pedido = buscarPedido(numeroPedido);
 
-        if (pedido == null) {
-            return false;
-        }
-
         if (!pedido.puedeCancelar()) {
-            return false;
+            throw new PedidoNoCancelableException("El pedido ya no se puede cancelar porque ya ha sido enviado.");
         }
 
         pedidos.remove(numeroPedido);
-        return true;
     }
 
     /*
      * obtenerPedidosPendientes()
-     * Devuelve los pedidos que todavía no han sido enviados.
+     *
+     * Devuelve todos los pedidos que todavía no han sido enviados.
      */
     public List<Pedido> obtenerPedidosPendientes() {
         List<Pedido> resultado = new ArrayList<>();
@@ -233,7 +280,8 @@ public class Datos {
 
     /*
      * obtenerPedidosEnviados()
-     * Devuelve los pedidos ya enviados.
+     *
+     * Devuelve todos los pedidos que ya han sido enviados.
      */
     public List<Pedido> obtenerPedidosEnviados() {
         List<Pedido> resultado = new ArrayList<>();
@@ -249,6 +297,7 @@ public class Datos {
 
     /*
      * obtenerPedidosPendientesCliente()
+     *
      * Devuelve los pedidos pendientes de un cliente concreto.
      */
     public List<Pedido> obtenerPedidosPendientesCliente(String email) {
@@ -266,6 +315,7 @@ public class Datos {
 
     /*
      * obtenerPedidosEnviadosCliente()
+     *
      * Devuelve los pedidos enviados de un cliente concreto.
      */
     public List<Pedido> obtenerPedidosEnviadosCliente(String email) {
